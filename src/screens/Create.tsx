@@ -1,10 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-
-// interface CreatePageProps {
-//   onCreate: (newTask: Partial<Task>) => void;
-// }
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Create = () => {
   const [username, setUsername] = useState("");
@@ -27,12 +25,13 @@ const Create = () => {
           status: false, // Default status
         }
       );
-      alert("Task Created successfully!");
-      navigate("/");
+      toast.success("Task Created successfully!", {
+        position: "top-center",
+      });
+      setTimeout(() => navigate("/"), 3000); // Redirect to home page after 3 seconds
 
       const data = response.data;
       console.log(data);
-      // onCreate(data.data); // Update state in parent component (HomePage)
 
       // Clear form fields
       setUsername("");
@@ -41,6 +40,9 @@ const Create = () => {
       setText("");
     } catch (error) {
       console.error("Error creating task:", error);
+      toast.error("Error creating task. Please try again.", {
+        position: "top-center",
+      });
       // Handle error
     }
   };
@@ -123,13 +125,13 @@ const Create = () => {
             </button>
           </div>
           <div>
-            {" "}
             <Link to="/" className="text-blue-500 mt-4 inline-block">
               Back to List
             </Link>
           </div>
         </form>
       </div>
+      <ToastContainer />
     </div>
   );
 };

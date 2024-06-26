@@ -3,6 +3,8 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { IoIosArrowBack } from "react-icons/io";
 import Task from "../Task";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const UpdatePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -20,7 +22,6 @@ const UpdatePage: React.FC = () => {
           `https://chalynyx-todo-backend.onrender.com/api/getbyid/todo/${id}`
         );
         const taskData = response.data?.data;
-        console.log(response.data?.data);
 
         setTask(taskData);
         setUsername(taskData.username);
@@ -43,10 +44,15 @@ const UpdatePage: React.FC = () => {
         `https://chalynyx-todo-backend.onrender.com/api/update/todo/${id}`,
         updatedTask
       );
-      alert("Task updated successfully!");
-      navigate("/"); // Redirect to home page after updating
+      toast.success("Task updated successfully!", {
+        position: "top-center",
+      });
+      setTimeout(() => navigate("/"), 3000); // Redirect to home page after 3 seconds
     } catch (error) {
       console.error("Error updating task:", error);
+      toast.error("Error updating task. Please try again.", {
+        position: "top-center",
+      });
     }
   };
 
@@ -104,12 +110,13 @@ const UpdatePage: React.FC = () => {
                 className="bg-blue-800 text-center border-2 hover:bg-blue-600 rounded-lg p-2 text-white w-96"
                 type="submit"
               >
-                Update
+                Submit
               </button>
             </div>
           </div>
         </form>
       </div>
+      <ToastContainer />
     </section>
   );
 };
