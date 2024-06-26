@@ -68,7 +68,7 @@ const HomePage: React.FC = () => {
             Create New Task
           </Link>
         </div>
-        <div className="min-w-full shadow rounded-lg overflow-hidden">
+        <div className="overflow-x-auto">
           <table className="min-w-full leading-normal">
             <thead>
               <tr>
@@ -98,16 +98,16 @@ const HomePage: React.FC = () => {
             <tbody>
               {tasks.map((task) => (
                 <tr key={task._id}>
-                  <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                  <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm break-words">
                     {task._id}
                   </td>
-                  <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                  <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm break-words">
                     {task.username}
                   </td>
-                  <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                  <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm break-words">
                     {task.email}
                   </td>
-                  <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                  <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm break-words">
                     {task.title}
                   </td>
                   <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
@@ -116,22 +116,22 @@ const HomePage: React.FC = () => {
                   <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                     {new Date(task.createdAt).toLocaleString()}
                   </td>
-                  <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm space-x-2">
+                  <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm space-y-2 sm:space-y-0 sm:space-x-2">
                     <Link
                       to={`/view/${task._id}`}
-                      className="text-blue-500 hover:text-blue-700"
+                      className="text-blue-500 hover:text-blue-700 block sm:inline-block"
                     >
                       View
                     </Link>
                     <Link
                       to={`/update/${task._id}`}
-                      className="text-blue-500 hover:text-blue-700"
+                      className="text-blue-500 hover:text-blue-700 block sm:inline-block"
                     >
                       Update
                     </Link>
                     <button
                       onClick={() => handleDelete(task._id)}
-                      className="text-red-500 hover:text-red-700"
+                      className="text-red-500 hover:text-red-700 block sm:inline-block"
                     >
                       Delete
                     </button>
