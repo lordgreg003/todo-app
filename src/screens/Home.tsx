@@ -1,56 +1,49 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import axios from "axios";
-import Task from "../Task";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import { ThunkDispatch } from "redux-thunk";
+import { GetAllTodosAction, deleteTodo } from "../redux/actions/users.actions";
+import { RootState } from "../redux/store";
+import { GetTodoType } from "../redux/types/users.types";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const HomePage: React.FC = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const dispatch: ThunkDispatch<RootState, void, any> = useDispatch();
+  const [tasks, setTasks] = useState<GetTodoType[]>([]);
   const [message, setMessage] = useState<string>("");
 
+  const {
+    loading,
+    serverResponse = [],
+    error,
+  } = useSelector((state: RootState) => state.GetAllTodo);
+
   useEffect(() => {
-    fetchTasks();
-  }, []);
+    dispatch(GetAllTodosAction());
+  }, [dispatch]);
 
-  const fetchTasks = async () => {
-    try {
-      const response = await axios.get(
-        "https://chalynyx-todo-backend.onrender.com/api/getall/todo"
-      );
-      const data = response.data;
-
-      console.log("API response:", data); // Log the API response
-
-      if (data && Array.isArray(data.data)) {
-        setTasks(data.data);
-      } else {
-        setTasks([]);
-        setMessage("Invalid response format");
-      }
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching tasks:", error);
-      setLoading(false);
-      setMessage("Error fetching tasks");
+  useEffect(() => {
+    if (serverResponse && Array.isArray(serverResponse.data)) {
+      setTasks(serverResponse.data);
+    } else {
+      setTasks([]);
+      setMessage("Invalid response format");
     }
-  };
+  }, [serverResponse]);
 
   const handleDelete = async (id: string) => {
     try {
-      await axios.delete(
-        `https://chalynyx-todo-backend.onrender.com/api/delete/todo/${id}`
-      );
-      setTasks(tasks.filter((task) => task._id !== id));
-      setMessage(`Deleted task with ID: ${id}`);
+      await dispatch(deleteTodo(id));
+      dispatch(GetAllTodosAction()); // Refresh tasks list after deletion
+      toast.success("Task deleted  successfully!", { position: "top-center" });
     } catch (error) {
       console.error("Error deleting task:", error);
-      setMessage("Error deleting task");
     }
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="container mx-auto px-4 sm:px-8">
@@ -142,6 +135,7 @@ const HomePage: React.FC = () => {
           </table>
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 };

@@ -1,76 +1,74 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../redux/store"; // Adjust the path accordingly
+import {
+  GetTodoByIdAction,
+  UpdateTodoAction,
+} from "../redux/actions/users.actions"; // Adjust the path accordingly
 import { IoIosArrowBack } from "react-icons/io";
-import Task from "../Task";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { ThunkDispatch } from "redux-thunk";
+import { ServerResponse } from "http";
 
 const UpdatePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [task, setTask] = useState<Task | null>(null);
+  const dispatch: ThunkDispatch<RootState, void, any> = useDispatch();
+
+  const todoDetails = useSelector((state: RootState) => state.GetByIdTodo);
+  const { loading, error, serverResponse } = todoDetails;
+  // console.log(todoDetails);
+
+  console.log(serverResponse.data);
+
   const [username, setUsername] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [title, setTitle] = useState<string>("");
   const [text, setText] = useState<string>("");
 
   useEffect(() => {
-    const fetchTask = async () => {
-      try {
-        const response = await axios.get(
-          `https://chalynyx-todo-backend.onrender.com/api/getbyid/todo/${id}`
-        );
-        const taskData = response.data?.data;
+    if (id) {
+      dispatch(GetTodoByIdAction(id));
+    }
+  }, [dispatch, id]);
 
-        setTask(taskData);
-        setUsername(taskData.username);
-        setEmail(taskData.email);
-        setTitle(taskData.title);
-        setText(taskData.text);
-      } catch (error) {
-        console.error("Error fetching task:", error);
-      }
-    };
+  useEffect(() => {
+    if (serverResponse.data) {
+      setUsername(serverResponse.data.username || "");
+      setEmail(serverResponse.data.email || "");
+      setTitle(serverResponse.data.title || "");
+      setText(serverResponse.data.text || "");
+    }
+  }, [serverResponse.data]);
 
-    fetchTask();
-  }, [id]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      const updatedTask = { username, email, title, text, status: false };
-      await axios.put(
-        `https://chalynyx-todo-backend.onrender.com/api/update/todo/${id}`,
-        updatedTask
-      );
-      toast.success("Task updated successfully!", {
-        position: "top-center",
-      });
+    if (id) {
+      dispatch(UpdateTodoAction({ id, username, email, title, text }));
+      toast.success("Task updated successfully!", { position: "top-center" });
       setTimeout(() => navigate("/"), 3000); // Redirect to home page after 3 seconds
-    } catch (error) {
-      console.error("Error updating task:", error);
-      toast.error("Error updating task. Please try again.", {
-        position: "top-center",
-      });
     }
   };
 
-  if (!task) return <div>Loading...</div>;
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>{error}</div>;
 
   return (
     <section>
       <div className="flex flex-col mt-24">
         <div className="mx-auto w-96">
-          <Link to={"/"} className="float-left flex flex-row space-x-0">
-            <IoIosArrowBack className="text-3xl hover:text-4xl" /> &nbsp;{" "}
+          <Link to="/" className="float-left flex flex-row space-x-0">
+            <IoIosArrowBack className="text-3xl hover:text-4xl" />
+            &nbsp;
             <span className="text-xl">Back</span>
           </Link>
         </div>
         <h1 className="mx-auto text-2xl mb-5 hover:text-4xl">Update Task</h1>
         <form onSubmit={handleSubmit} className="mx-auto">
           <div className="flex flex-col space-y-3">
-            <div className="">
+            <div>
               <input
                 className="border-slate-600 border-2 hover:border-4 rounded-lg p-1 w-96"
                 type="text"
@@ -79,7 +77,7 @@ const UpdatePage: React.FC = () => {
                 onChange={(e) => setUsername(e.target.value)}
               />
             </div>
-            <div className="">
+            <div>
               <input
                 className="border-slate-600 border-2 hover:border-4 rounded-lg p-1 w-96"
                 type="email"
@@ -88,7 +86,7 @@ const UpdatePage: React.FC = () => {
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
-            <div className="">
+            <div>
               <input
                 className="border-slate-600 border-2 hover:border-4 rounded-lg p-1 w-96"
                 type="text"
@@ -97,7 +95,7 @@ const UpdatePage: React.FC = () => {
                 onChange={(e) => setTitle(e.target.value)}
               />
             </div>
-            <div className="">
+            <div>
               <textarea
                 className="border-slate-600 border-2 hover:border-4 rounded-lg p-1 w-96"
                 placeholder="Enter text"
@@ -105,7 +103,7 @@ const UpdatePage: React.FC = () => {
                 onChange={(e) => setText(e.target.value)}
               />
             </div>
-            <div className="">
+            <div>
               <button
                 className="bg-blue-800 text-center border-2 hover:bg-blue-600 rounded-lg p-2 text-white w-96"
                 type="submit"

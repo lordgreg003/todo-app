@@ -1,37 +1,31 @@
 import React, { useState } from "react";
-import axios from "axios";
+import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
+import { CreateTodoAction } from "../redux/actions/users.actions"; // Adjust the import according to your actions location
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { ThunkDispatch } from "redux-thunk";
+import { RootState } from "../redux/store";
 
 const Create = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [title, setTitle] = useState("");
   const [text, setText] = useState("");
+  const [loading, setLoading] = useState(false); // Track loading state
+  const dispatch: ThunkDispatch<RootState, void, any> = useDispatch();
+
+  // const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true); // Set loading to true before dispatching
 
     try {
-      const response = await axios.post(
-        "https://chalynyx-todo-backend.onrender.com/api/todo/create",
-        {
-          username,
-          email,
-          title,
-          text,
-          status: false, // Default status
-        }
-      );
-      toast.success("Task Created successfully!", {
-        position: "top-center",
-      });
+      await dispatch(CreateTodoAction({ username, email, title, text }));
+      toast.success("Task created successfully!", { position: "top-center" });
       setTimeout(() => navigate("/"), 3000); // Redirect to home page after 3 seconds
-
-      const data = response.data;
-      console.log(data);
 
       // Clear form fields
       setUsername("");
@@ -39,11 +33,11 @@ const Create = () => {
       setTitle("");
       setText("");
     } catch (error) {
-      console.error("Error creating task:", error);
       toast.error("Error creating task. Please try again.", {
         position: "top-center",
       });
-      // Handle error
+    } finally {
+      setLoading(false); // Set loading to false after operation
     }
   };
 
@@ -120,8 +114,9 @@ const Create = () => {
             <button
               type="submit"
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              disabled={loading}
             >
-              Create Task
+              {loading ? "Creating..." : "Create Task"}
             </button>
           </div>
           <div>
