@@ -1,37 +1,30 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import axios from "axios";
-import Task from "../Task";
+import { useSelector, useDispatch } from "react-redux";
+import { GetTodoByIdAction } from "../redux/actions/users.actions";
+import { ReducersType } from "../redux/store";
+import { ThunkDispatch } from "redux-thunk";
+import { RootState } from "../redux/store";
 
 const ViewTask: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const [task, setTask] = useState<Task | null>(null);
+  const dispatch: ThunkDispatch<RootState, void, any> = useDispatch();
+
+  const { loading, error, serverResponse } = useSelector(
+    (state: ReducersType) => state.GetByIdTodo
+  );
 
   useEffect(() => {
-    const fetchTask = async () => {
-      try {
-        const config = {
-          headers: {
-            "content-type": "application/json",
-          },
-        };
-        const response = await axios.get(
-          `https://chalynyx-todo-backend.onrender.com/api/getbyid/todo/${id}`,
-          config
-        );
+    if (id) {
+      dispatch(GetTodoByIdAction(id));
+    }
+  }, [dispatch, id]);
 
-        console.log(response.data?.data);
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (!serverResponse) return null;
 
-        setTask(response.data?.data);
-      } catch (error) {
-        console.error("Error fetching task:", error);
-      }
-    };
-
-    fetchTask();
-  }, [id]);
-
-  if (!task) return <div>Loading...</div>;
+  const task = serverResponse.data;
 
   return (
     <div>
