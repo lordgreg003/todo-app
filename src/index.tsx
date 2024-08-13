@@ -4,7 +4,7 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { Provider } from "react-redux";
-import { RouterProvider } from "react-router-dom";
+// import { RouterProvider } from "react-router-dom";
 import { store } from "./redux/store";
 
 const root = ReactDOM.createRoot(
