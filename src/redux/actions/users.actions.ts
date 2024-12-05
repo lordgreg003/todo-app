@@ -49,13 +49,9 @@ export const CreateTodoAction =
     try {
       dispatch({ type: CREATE_TODO_REQUEST });
 
-      // Get the token from your state or any other place you store it
-      const token = getState();
-
       const config = {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Include the token here
         },
       };
 
